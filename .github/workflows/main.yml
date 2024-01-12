@@ -1,8 +1,9 @@
 name: CI Workflow for Docker Build
 on:
   push:
+
 jobs:
-  endproject:
+  docker:
     env:
      appName: "docker-image"
     runs-on: ubuntu-latest
@@ -30,3 +31,17 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.appName }}:latest
+      - name: Executing Kubectl command on Kubernetes Server Remotely
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+         host: ${{ secrets.HOST }}
+         username: ${{ secrets.USERNAME }}
+         password: ${{ secrets.PASSWORD }}
+         port: ${{ secrets.PORT }}
+         script: |
+           git clone https://github.com/lucamattiolivodafone/DevOps-Capstone-Project.git
+           cd DevOps-Capstone-Project
+           helm list -A
+           helm install mavenbuild-dev ./webapp
+           helm list -A
+           kubectl get all
